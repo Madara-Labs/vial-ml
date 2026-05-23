@@ -21,6 +21,14 @@ build-backend = "uv_build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+[tool.coverage.run]
+source = ["src/vial"]
+omit = ["*/cli.py"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 85
+
 [dependency-groups]
 dev = [
     "pytest>=9.0.3",
