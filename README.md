@@ -7,9 +7,9 @@ Vial extracts a single function or class from a large Python file into a clean, 
 ## Install
 
 ```bash
-pip install vial
+pip install vial-ml
 # or with uv:
-uv add vial
+uv add vial-ml
 ```
 
 ## CLI

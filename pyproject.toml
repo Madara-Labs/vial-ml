@@ -1,5 +1,5 @@
 [project]
-name = "vial"
+name = "vial-ml"
 version = "0.1.0"
 description = "Surgical code isolation for AI agents"
 readme = "README.md"
@@ -17,6 +17,9 @@ vial = "vial.cli:app"
 [build-system]
 requires = ["uv_build>=0.8.14,<0.9.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "vial"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
