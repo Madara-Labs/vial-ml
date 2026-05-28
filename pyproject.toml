@@ -7,14 +7,14 @@ authors = [
     { name = "Momchil Georgiev", email = "40865235+momchilgeorgiev@users.noreply.github.com" }
 ]
 requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.25.1",
+]
 
 [project.urls]
 Homepage = "https://github.com/Madara-Labs/vial-ml"
 Repository = "https://github.com/Madara-Labs/vial-ml"
 Issues = "https://github.com/Madara-Labs/vial-ml/issues"
-dependencies = [
-    "typer>=0.25.1",
-]
 
 [project.scripts]
 vial = "vial.cli:app"
