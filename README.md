@@ -62,9 +62,48 @@ uv run python benchmarks/run_benchmark.py
 
 No API key needed — the benchmark uses only local file analysis.
 
-## Why
+## How this compares to standard approaches
 
-When an agent reads a 2,000-line file to fix a 20-line function it wastes tokens, risks editing the wrong code, and produces complex diffs that frequently fail. Vial reduces the context to only what matters, cutting token usage by 71–88% on typical files.
+Every AI coding tool has to solve the same problem: the model needs to see relevant code without consuming the entire codebase. Here's how common approaches compare to Vial.
+
+### Claude Code / Gemini CLI — shell-tool exploration
+
+Terminal-native agents hand the model shell tools (`grep`, `find`, `cat`) and let it explore the repo the way a new hire would — searching for keywords, opening files one at a time. For a question like "what calls `process_payment`?", an agent might open 10–25 files and burn 45,000–117,000 tokens before writing a single line. The model sees everything it found, not just what it needs.
+
+```
+Task: fix a bug in process_payment()
+─────────────────────────────────────────────────
+Claude Code (grep mode):   ~108,000 tokens used
+Vial (isolated file):        ~1,200 tokens used
+Reduction:                       ~99%
+```
+
+### GitHub Copilot — cursor-proximity windowing
+
+Copilot focuses context on the area around the cursor and recently open files. This is fast and works well for completions, but the agent has no understanding of where a function starts and ends — it sends a fixed character window, which may include half a function above and half a function below the target.
+
+### Cursor — RAG + embeddings
+
+Cursor indexes the codebase and retrieves semantically relevant chunks via embeddings. Better than raw grep, but retrieval returns *chunks* (fixed line ranges), not *semantic units* (full function/class boundaries). A retrieved chunk can cut off mid-function, leaving the agent with incomplete context.
+
+### Aider — whole-file map
+
+Aider builds a repo-map summarising every file's symbols and sends relevant whole files to the model. More precise than grep, but the unit of context is still the whole file. A 500-line file gets sent even if only a 20-line function needs changing.
+
+### Vial — AST-bounded isolation
+
+Vial uses Python's AST to find the exact start and end line of the target, so the isolated file always contains exactly one complete, syntactically valid function or class — nothing more. Surrounding code is never included, never at risk of accidental modification, and never charged as tokens.
+
+```
+Approach          Context unit       Risk of side-effects    Token cost
+──────────────────────────────────────────────────────────────────────
+grep / cat        Whole file         High                    High
+Cursor RAG        Fixed-line chunk   Medium (cut-off risk)   Medium
+Aider map         Whole file         Medium                  Medium-High
+Vial              Single AST node    None                    Low (71–88% less)
+```
+
+The tradeoff: Vial works at the function/class level. It is not a replacement for tools that handle cross-file refactors or project-wide search — it is the right tool once you know *what* to edit.
 
 ## How it works
 
