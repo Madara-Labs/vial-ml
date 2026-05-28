@@ -8,3 +8,8 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Coverage and testing
+.coverage
+.pytest_cache/
+.vial_workspace/
