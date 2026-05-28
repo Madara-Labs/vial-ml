@@ -68,27 +68,21 @@ Every AI coding tool has to solve the same problem: the model needs to see relev
 
 ### Claude Code / Gemini CLI — shell-tool exploration
 
-Terminal-native agents hand the model shell tools (`grep`, `find`, `cat`) and let it explore the repo the way a new hire would — searching for keywords, opening files one at a time. For a question like "what calls `process_payment`?", an agent might open 10–25 files and burn 45,000–117,000 tokens before writing a single line. The model sees everything it found, not just what it needs.
+Terminal-native agents hand the model shell tools (`grep`, `find`, `cat`) and let it explore the repo the way a new hire would — searching for keywords, opening files one at a time. For a question like "what calls `process_payment`?", an agent might open 10–25 files and burn tens of thousands of tokens before writing a single line. The model sees everything it found, not just what it needs.
 
-```
-Task: fix a bug in process_payment()
-─────────────────────────────────────────────────
-Claude Code (grep mode):   ~108,000 tokens used
-Vial (isolated file):        ~1,200 tokens used
-Reduction:                       ~99%
-```
+Independent measurements on real codebases put Claude Code's grep-only mode at **108,000–117,000 tokens** for a single targeted task ([source](https://dev.to/marjoballabani/your-ai-agent-wastes-87-of-its-tokens-just-finding-code-i-fixed-that-4d5p)). Those measurements were on larger codebases than Vial's benchmark fixture — direct comparison isn't apples-to-apples — but the dynamic is the same: the agent reads far more than it needs.
 
 ### GitHub Copilot — cursor-proximity windowing
 
-Copilot focuses context on the area around the cursor and recently open files. This is fast and works well for completions, but the agent has no understanding of where a function starts and ends — it sends a fixed character window, which may include half a function above and half a function below the target.
+Copilot focuses context on the area around the cursor and recently open files. This is fast and works well for completions, but the agent has no understanding of where a function starts and ends — it sends a fixed character window, which may include half a function above and half a function below the target. Inline completions use an 8–16k token local window; agent mode uses the full model context ([source](https://tokenlimits.app/blog/copilot-context-window-limit)).
 
 ### Cursor — RAG + embeddings
 
-Cursor indexes the codebase and retrieves semantically relevant chunks via embeddings. Better than raw grep, but retrieval returns *chunks* (fixed line ranges), not *semantic units* (full function/class boundaries). A retrieved chunk can cut off mid-function, leaving the agent with incomplete context.
+Cursor indexes the codebase and retrieves semantically relevant chunks via embeddings. Better than raw grep, but retrieval returns *chunks* (fixed line ranges), not *semantic units* (full function/class boundaries). A retrieved chunk can cut off mid-function, leaving the agent with incomplete context ([source](https://www.nxcode.io/resources/news/cursor-vs-claude-code-vs-github-copilot-2026-ultimate-comparison)).
 
 ### Aider — whole-file map
 
-Aider builds a repo-map summarising every file's symbols and sends relevant whole files to the model. More precise than grep, but the unit of context is still the whole file. A 500-line file gets sent even if only a 20-line function needs changing.
+Aider builds a repo-map summarising every file's symbols and sends relevant whole files to the model. More precise than grep, but the unit of context is still the whole file. A 500-line file gets sent even if only a 20-line function needs changing. With structural retrieval Aider uses 8,500–13,000 tokens per task — better than grep-mode agents, but still file-scoped ([source](https://dev.to/marjoballabani/your-ai-agent-wastes-87-of-its-tokens-just-finding-code-i-fixed-that-4d5p)).
 
 ### Vial — AST-bounded isolation
 
