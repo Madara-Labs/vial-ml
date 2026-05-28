@@ -46,3 +46,11 @@ When an agent reads a 2,000-line file to fix a 20-line function it wastes tokens
 3. **Merge** — Vial validates the modified code's syntax, then splices it back into the original file at the exact line range. Surrounding code is never touched.
 
 All session state lives in a `metadata.json` file inside the workspace directory.
+
+## Dependencies
+
+| Package | Purpose |
+|---|---|
+| [`typer`](https://github.com/fastapi/typer) | CLI interface |
+
+The standard library covers everything else: `ast` for parsing, `pathlib` for file I/O, `json` for workspace state.
