@@ -35,6 +35,33 @@ isolated_path = v.extract("billing.py", "process_payment")
 v.merge()
 ```
 
+## Token efficiency
+
+Vial reduces the context an agent sees to only what matters. On a representative 175-line module:
+
+```
+Target            Isolated tokens    Full-file tokens    Savings
+----------------------------------------------------------------
+compute_hash               ~139              ~1,172        88%  ████████████████████████████░░░
+read_config                ~148              ~1,172        87%  ███████████████████████████░░░░
+write_config               ~156              ~1,172        87%  ███████████████████████████░░░░
+ConnectionPool             ~297              ~1,172        75%  ███████████████████████░░░░░░░░
+ConfigManager              ~290              ~1,172        75%  ███████████████████████░░░░░░░░
+EventBus                   ~337              ~1,172        71%  ██████████████████████░░░░░░░░░
+```
+
+Token estimate: 1 token ≈ 4 characters (standard approximation for code).
+
+### Run it yourself
+
+```bash
+git clone https://github.com/Madara-Labs/vial-ml
+cd vial-ml
+uv run python benchmarks/run_benchmark.py
+```
+
+No API key needed — the benchmark uses only local file analysis.
+
 ## Why
 
 When an agent reads a 2,000-line file to fix a 20-line function it wastes tokens, risks editing the wrong code, and produces complex diffs that frequently fail. Vial reduces the context to only what matters, cutting token usage by 71–88% on typical files.
