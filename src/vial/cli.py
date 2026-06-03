@@ -10,12 +10,14 @@ app = typer.Typer(help="Vial — surgical code isolation for AI agents.")
 def extract(
     source: Path = typer.Argument(..., help="Path to the Python source file."),
     target: str = typer.Argument(..., help="Name of the function or class to extract."),
+    methods: str = typer.Option(None, help="Comma-separated list of methods to edit within a class"),
     workspace: Path = typer.Option(".vial_workspace", help="Workspace directory."),
 ):
     """Extract a named function or class into an isolated workspace file."""
     try:
         v = Vial(workspace_dir=workspace)
-        isolated = v.extract(source, target)
+        methods_list = [m.strip() for m in methods.split(",")] if methods else None
+        isolated = v.extract(source, target, methods_list)
         
         try:
             enc = tiktoken.get_encoding("cl100k_base")

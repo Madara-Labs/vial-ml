@@ -15,10 +15,17 @@ uv add vial-ml
 ## CLI
 
 ```bash
-# Isolate a function
+# Isolate a single function or class
 vial extract billing.py process_payment
 
 # Agent edits .vial_workspace/process_payment_isolated.py ...
+
+# Isolate a class shape, making only specific methods editable
+# Non-target methods are replaced with `pass # stub`
+vial extract billing.py PaymentProcessor --methods charge,refund
+
+# Review changes before merging
+vial diff
 
 # Stitch it back (validates syntax first)
 vial merge
@@ -30,8 +37,19 @@ vial merge
 from vial import Vial
 
 v = Vial()
+
+# Extract a single function
 isolated_path = v.extract("billing.py", "process_payment")
-# agent edits isolated_path ...
+
+# Or extract a class shape with specific target methods
+class_isolated_path = v.extract("billing.py", "PaymentProcessor", methods=["charge", "refund"])
+
+# agent edits isolated paths ...
+
+# review changes
+print(v.diff())
+
+# validate syntax and splice edits back
 v.merge()
 ```
 
@@ -101,9 +119,9 @@ The tradeoff: Vial works at the function/class level. It is not a replacement fo
 
 ## How it works
 
-1. **Extract** — AST-based line-bound finder locates the exact start/end of the target. A protected context header (imports + module-level globals, commented out) is prepended so the agent has the context it needs without being able to accidentally modify it.
+1. **Extract** — AST-based line-bound finder locates the exact start/end of the target. A protected context header (imports + module-level globals, commented out) is prepended so the agent has the context it needs without being able to accidentally modify it. When using `--methods` on a class, non-target methods are stubbed out to show the "Class Shape" without the noise.
 2. **Edit** — The agent modifies only the isolated file.
-3. **Merge** — Vial validates the modified code's syntax, then splices it back into the original file at the exact line range. Surrounding code is never touched.
+3. **Merge** — Vial validates the modified code's syntax, then splices it back into the original file at the exact line range. Surrounding code is never touched. For class shapes, Vial does AST-diff splicing to merge only the edited target methods and any newly added methods, ignoring hallucinations to stubs.
 
 All session state lives in a `metadata.json` file inside the workspace directory.
 

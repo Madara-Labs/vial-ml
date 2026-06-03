@@ -53,14 +53,17 @@ def test_splice_back_replaces_target_lines(tmp_path):
     modified_func = "def process_payment(amount: float) -> dict:\n    if amount <= 0:\n        raise ValueError('negative')\n    return {'amount': amount, 'status': 'ok'}"
 
     # process_payment starts at line index 7 (0-indexed), ends at index 9
-    result = splice_back(
-        source_filepath=original_file,
+    original_lines = original_file.read_text().splitlines()
+    new_lines = splice_back(
+        original_lines=original_lines,
         modified_code=modified_func,
         start_line=7,
         end_line=9,
     )
-    assert result.exists()
-    content = result.read_text()
+    original_file.write_text("\n".join(new_lines) + "\n")
+    
+    assert original_file.exists()
+    content = original_file.read_text()
     assert "raise ValueError" in content
     assert "def helper" in content
     assert "def another" in content
@@ -73,13 +76,15 @@ def test_splice_back_reindents_with_indent(tmp_path):
 
     # agent edits dedented code; splice_back must re-indent it
     modified = "def bar(self):\n    return 99"
-    splice_back(
-        source_filepath=original_file,
+    original_lines = original_file.read_text().splitlines()
+    new_lines = splice_back(
+        original_lines=original_lines,
         modified_code=modified,
         start_line=1,
         end_line=3,
         indent="    ",
     )
+    original_file.write_text("\n".join(new_lines) + "\n")
     content = original_file.read_text()
     assert "    def bar(self):" in content
     assert "        return 99" in content
@@ -91,12 +96,14 @@ def test_splice_back_preserves_surrounding_code(tmp_path):
 
     modified_func = "def process_payment(amount: float) -> dict:\n    return {'amount': amount * 2, 'status': 'ok'}"
 
-    splice_back(
-        source_filepath=original_file,
+    original_lines = original_file.read_text().splitlines()
+    new_lines = splice_back(
+        original_lines=original_lines,
         modified_code=modified_func,
         start_line=7,
         end_line=9,
     )
+    original_file.write_text("\n".join(new_lines) + "\n")
     content = original_file.read_text()
     assert "import os" in content
     assert "MAX_RETRIES = 3" in content
