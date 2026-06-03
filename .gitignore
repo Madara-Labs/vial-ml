@@ -13,3 +13,6 @@ wheels/
 .coverage
 .pytest_cache/
 .vial_workspace/
+
+# Claude Code
+.claude/
