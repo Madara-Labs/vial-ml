@@ -315,8 +315,8 @@ wheels = [
 ]
 
 [[package]]
-name = "vial"
-version = "0.1.0"
+name = "vial-ml"
+version = "0.1.3"
 source = { editable = "." }
 dependencies = [
     { name = "typer" },
