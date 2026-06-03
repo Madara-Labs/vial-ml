@@ -96,6 +96,34 @@ def test_merge_cleans_up_workspace(vial, source_file):
     assert not vial.workspace.metadata_path.exists()
 
 
+def test_extract_method_is_dedented(vial, source_file):
+    isolated = vial.extract(source_file, "charge")
+    content = Path(isolated).read_text()
+    # The isolated code must be valid standalone Python
+    import ast
+    code_only = content.split("#" + "=" * 40 + " END OF CONTEXT " + "=" * 40)[-1].strip()
+    ast.parse(code_only)  # raises if indented
+    assert "def charge" in code_only
+    assert not any(line.startswith("    def") for line in code_only.splitlines()[:1])
+
+
+def test_merge_method_splices_back_correctly(vial, source_file):
+    vial.extract(source_file, "charge")
+    isolated_path = vial.workspace.isolated_path("charge")
+    content = Path(isolated_path).read_text()
+    Path(isolated_path).write_text(
+        content.replace(
+            "return process_payment(amount)",
+            "return process_payment(amount * 2)",
+        )
+    )
+    vial.merge()
+    final = source_file.read_text()
+    assert "return process_payment(amount * 2)" in final
+    assert "class PaymentProcessor" in final
+    assert "def __init__" in final
+
+
 def test_extract_class(vial, source_file):
     isolated = vial.extract(source_file, "PaymentProcessor")
     content = Path(isolated).read_text()

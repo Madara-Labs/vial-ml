@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "linkedin-animation",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8743", "--directory", "/Users/momchilgeorgiev/Code/VibeCoding/vial"],
+      "port": 8743
+    }
+  ]
+}

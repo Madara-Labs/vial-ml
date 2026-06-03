@@ -59,3 +59,19 @@ def test_result_code_matches_source_lines():
     result = find_target(SAMPLE, "simple_func")
     expected = "\n".join(lines[result.start_line : result.end_line])
     assert result.code == expected
+
+
+def test_method_code_is_dedented():
+    result = find_target(SAMPLE, "method")
+    assert result.code.startswith("def method")
+    assert not result.code.startswith(" ")
+
+
+def test_method_indent_is_preserved():
+    result = find_target(SAMPLE, "method")
+    assert result.indent == "    "
+
+
+def test_top_level_function_has_empty_indent():
+    result = find_target(SAMPLE, "simple_func")
+    assert result.indent == ""

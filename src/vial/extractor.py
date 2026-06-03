@@ -1,4 +1,5 @@
 import ast
+import textwrap
 from dataclasses import dataclass
 
 
@@ -8,6 +9,7 @@ class ExtractionResult:
     start_line: int  # 0-indexed, inclusive
     end_line: int    # 0-indexed, exclusive
     code: str
+    indent: str      # original leading whitespace of the first line
 
 
 def find_target(source_code: str, target_name: str) -> ExtractionResult:
@@ -20,12 +22,15 @@ def find_target(source_code: str, target_name: str) -> ExtractionResult:
             if node.name == target_name:
                 start = node.lineno - 1
                 end = node.end_lineno
-                code = "\n".join(lines[start:end])
+                raw = "\n".join(lines[start:end])
+                indent = len(lines[start]) - len(lines[start].lstrip())
+                indent_str = lines[start][:indent]
                 return ExtractionResult(
                     target_name=target_name,
                     start_line=start,
                     end_line=end,
-                    code=code,
+                    code=textwrap.dedent(raw),
+                    indent=indent_str,
                 )
 
     raise ValueError(

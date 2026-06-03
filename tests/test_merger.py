@@ -66,6 +66,25 @@ def test_splice_back_replaces_target_lines(tmp_path):
     assert "def another" in content
 
 
+def test_splice_back_reindents_with_indent(tmp_path):
+    original = "class Foo:\n    def bar(self):\n        return 1\n"
+    original_file = tmp_path / "original.py"
+    original_file.write_text(original)
+
+    # agent edits dedented code; splice_back must re-indent it
+    modified = "def bar(self):\n    return 99"
+    splice_back(
+        source_filepath=original_file,
+        modified_code=modified,
+        start_line=1,
+        end_line=3,
+        indent="    ",
+    )
+    content = original_file.read_text()
+    assert "    def bar(self):" in content
+    assert "        return 99" in content
+
+
 def test_splice_back_preserves_surrounding_code(tmp_path):
     original_file = tmp_path / "original.py"
     original_file.write_text(ORIGINAL)

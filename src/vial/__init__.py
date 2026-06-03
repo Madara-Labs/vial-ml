@@ -32,6 +32,7 @@ class Vial:
             "target_name": target_name,
             "start_line": result.start_line,
             "end_line": result.end_line,
+            "indent": result.indent,
             "isolated_filepath": str(isolated_path.resolve()),
         })
 
@@ -56,6 +57,7 @@ class Vial:
             modified_code=modified_code,
             start_line=meta["start_line"],
             end_line=meta["end_line"],
+            indent=meta.get("indent", ""),
         )
 
         self.workspace.cleanup()

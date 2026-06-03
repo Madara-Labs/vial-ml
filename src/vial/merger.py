@@ -24,10 +24,14 @@ def splice_back(
     modified_code: str,
     start_line: int,
     end_line: int,
+    indent: str = "",
 ) -> Path:
     """Replace lines [start_line:end_line] in source_filepath with modified_code."""
     original_lines = source_filepath.read_text().splitlines()
-    modified_lines = modified_code.splitlines()
+    modified_lines = [
+        indent + line if line else line
+        for line in modified_code.splitlines()
+    ]
 
     new_lines = original_lines[:start_line] + modified_lines + original_lines[end_line:]
     source_filepath.write_text("\n".join(new_lines) + "\n")
