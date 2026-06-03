@@ -1,4 +1,5 @@
 from pathlib import Path
+import difflib
 from vial.workspace import Workspace
 from vial.extractor import find_target
 from vial.context import extract_context
@@ -17,7 +18,7 @@ class Vial:
         source_code = source.read_text()
 
         result = find_target(source_code, target_name)
-        context = extract_context(source_code)
+        context = extract_context(source_code, target_name)
 
         header = "# Context from original file (read-only — do not modify this block):\n"
         if context:
@@ -61,3 +62,35 @@ class Vial:
         )
 
         self.workspace.cleanup()
+
+    def diff(self) -> str:
+        """Return a unified diff between the original source block and the modified isolated code."""
+        meta = self.workspace.load_metadata()
+        isolated = Path(meta["isolated_filepath"])
+        content = isolated.read_text()
+
+        modified_code = strip_header(content, HEADER_DELIMITER)
+        
+        source_filepath = Path(meta["source_filepath"])
+        original_lines = source_filepath.read_text().splitlines()
+        
+        start_line = meta["start_line"]
+        end_line = meta["end_line"]
+        indent = meta.get("indent", "")
+        
+        original_block = original_lines[start_line:end_line]
+        
+        modified_lines = [
+            indent + line if line else line
+            for line in modified_code.splitlines()
+        ]
+        
+        diff_lines = list(difflib.unified_diff(
+            original_block,
+            modified_lines,
+            fromfile=f"a/{source_filepath.name}",
+            tofile=f"b/{source_filepath.name}",
+            lineterm=""
+        ))
+        
+        return "\n".join(diff_lines)

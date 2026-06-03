@@ -1,5 +1,6 @@
 import typer
 from pathlib import Path
+import tiktoken
 from vial import Vial
 
 app = typer.Typer(help="Vial — surgical code isolation for AI agents.")
@@ -15,7 +16,33 @@ def extract(
     try:
         v = Vial(workspace_dir=workspace)
         isolated = v.extract(source, target)
-        typer.echo(f"Isolated '{target}' → {isolated}")
+        
+        try:
+            enc = tiktoken.get_encoding("cl100k_base")
+            orig_tokens = len(enc.encode(source.read_text()))
+            isolated_tokens = len(enc.encode(Path(isolated).read_text()))
+            
+            typer.echo(f"Isolated '{target}' → {isolated}")
+            typer.echo(f"Token count: {isolated_tokens} (down from {orig_tokens} in original file)")
+        except Exception:
+            typer.echo(f"Isolated '{target}' → {isolated}")
+    except (ValueError, FileNotFoundError) as e:
+        typer.echo(f"Error: {e}", err=True)
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def diff(
+    workspace: Path = typer.Option(".vial_workspace", help="Workspace directory."),
+):
+    """Show a unified diff of the modified isolated file against the original source."""
+    try:
+        v = Vial(workspace_dir=workspace)
+        diff_output = v.diff()
+        if diff_output:
+            typer.echo(diff_output)
+        else:
+            typer.echo("No changes detected.")
     except (ValueError, FileNotFoundError) as e:
         typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1)

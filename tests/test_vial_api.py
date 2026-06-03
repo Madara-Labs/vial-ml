@@ -12,7 +12,8 @@ def helper():
     return 1
 
 def process_payment(amount: float) -> dict:
-    return {"amount": amount, "status": "pending"}
+    print(MAX_RETRIES, json.dumps({}))
+    return {"amount": amount, "status": os.environ.get("STATUS", "pending")}
 
 class PaymentProcessor:
     def __init__(self, key: str):
@@ -63,7 +64,7 @@ def test_merge_splices_changes_back(vial, source_file):
     # Simulate agent rewriting the isolated file
     isolated_path.write_text(
         Path(isolated_path).read_text().replace(
-            'return {"amount": amount, "status": "pending"}',
+            'return {"amount": amount, "status": os.environ.get("STATUS", "pending")}',
             'if amount <= 0:\n        raise ValueError("negative")\n    return {"amount": amount, "status": "ok"}',
         )
     )
