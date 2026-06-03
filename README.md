@@ -7,8 +7,13 @@ Vial extracts a single function or class from a large Python file into a clean, 
 ## Install
 
 ```bash
+# install skill with npx:
+npx skills add Madara-Labs/vial-ml
+
+# or install it as a package:
+# 1. with pip:
 pip install vial-ml
-# or with uv:
+# 2. or with uv:
 uv add vial-ml
 ```
 
