@@ -3,7 +3,7 @@
 Install with:
 
 ```bash
-npx skills add <your-github-org>/vial
+npx skills add Madara-Labs/vial-ml
 ```
 
 ## Skills
